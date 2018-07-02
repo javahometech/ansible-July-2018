@@ -1,0 +1,34 @@
+---
+ - hosts: webservers
+   become: True
+   vars_files:
+     - ./vars/app_vars.yml
+   tasks:
+     - name: Install Apache Server
+       yum: name=httpd state=present
+     - name: Install Git
+       yum: 
+         name: git
+         state: present
+     - name: Enable & Start Apache On Reboot
+       service:
+         name: httpd
+         enabled: True
+         state: started
+     - name: Clone/Pull website from Git
+       git:
+         repo: "{{git_url}}"
+         dest: "{{deployment_dir}}"
+       tags:
+         - deploy
+     - name: Copy httpd.conf to Apache Servres
+       copy:
+         src: ./files/httpd.conf
+         dest: /etc/httpd/conf/httpd.conf
+
+   handlers:
+     - name: Restart Apache
+       service:
+         name: httpd
+         state: restarted
+

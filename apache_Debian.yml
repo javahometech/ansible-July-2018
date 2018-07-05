@@ -1,0 +1,29 @@
+---
+     - name: Install required packages on Ubuntu
+       apt:
+         name: "{{item}}"
+         state: present
+       with_items:
+         - git
+         - apache2
+         - ftp
+       when: ansible_os_family == 'Debian'
+     - name: Enable & Start Apache On Reboot
+       service:
+         name: apache2
+         enabled: True
+         state: started
+       when: ansible_os_family == 'Debian'
+     - name: Clone/Pull website from Git
+       git:
+         repo: "{{git_url}}"
+         dest: "{{deployment_dir}}"
+       tags:
+         - deploy
+     - name: Copy httpd.conf to Apache Servres
+       template:
+         src: ./files/httpd.conf
+         dest: /etc/apache2/ports.conf
+       notify:
+         - Restart Apache Debian
+       when: ansible_os_family == 'Debian'

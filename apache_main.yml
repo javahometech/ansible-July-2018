@@ -1,0 +1,19 @@
+---
+ - hosts: webservers
+   become: True
+   vars_files:
+     - ./vars/app_vars.yml
+   tasks:
+     - name: Include Linux tasks
+       include: apache_RedHat.yml
+     - name: Include Ubuntu tasks
+       include: apache_Debian.yml
+   handlers:
+     - name: Restart Apache Linux
+       service:
+         name: httpd
+         state: restarted
+     - name: Restart Apache Debian
+       service:
+         name: apache2
+         state: restarted

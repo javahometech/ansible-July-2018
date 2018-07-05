@@ -1,0 +1,27 @@
+---
+     - name: Install required Packages On Linux
+       yum: name={{item}} state=present
+       with_items:
+         - git
+         - httpd
+         - ftp
+       when: ansible_os_family == 'RedHat'
+     - name: Enable & Start Apache On Reboot
+       service:
+         name: httpd
+         enabled: True
+         state: started
+       when: ansible_os_family == 'RedHat'
+     - name: Clone/Pull website from Git
+       git:
+         repo: "{{git_url}}"
+         dest: "{{deployment_dir}}"
+       tags:
+         - deploy
+     - name: Copy httpd.conf to Apache Servres
+       template:
+         src: ./files/httpd.conf
+         dest: /etc/httpd/conf/httpd.conf
+       notify:
+         - Restart Apache Linux
+       when: ansible_os_family == 'RedHat'
